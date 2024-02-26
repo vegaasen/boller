@@ -4,7 +4,16 @@ import {BunsState, CurrentBunLoverState} from "../types/Buns.ts";
 export const BunsContext = createContext<BunsState>({
     buns: [],
     setBuns: () => {
-    }
+    },
+    bunFilter: 'rank',
+    setBunFilter: () => {
+    },
+    locationFilter: 'all',
+    setLocationFilter: () => {
+    },
+    filteredBuns: [],
+    setFilteredBuns: () => {
+    },
 })
 
 export const CurrentBunLoverContext = createContext<CurrentBunLoverState>({

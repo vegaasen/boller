@@ -1,14 +1,28 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import TheBuns from "./pages/TheBuns.tsx";
-import {QueryClient, QueryClientProvider} from "react-query";
-import {CurrentBunLoverContext} from "./context/Contexts.ts";
-import {useEffect, useState} from "react";
-import {LatitudeLongitude} from "./types/Buns.ts";
-
-const queryClient = new QueryClient()
+import TheBunsPage from "./pages/TheBuns/TheBunsPage.tsx";
+import {useQuery} from "react-query";
+import {BunsContext, CurrentBunLoverContext} from "./context/Contexts.ts";
+import React, {useEffect, useState} from "react";
+import {BunFilter, HouseWithBuns, HouseWithBunsId, LatitudeLongitude, LocationFilter} from "./types/Buns.ts";
+import ContributePage from "./pages/ContributePage.tsx";
+import SelectedBunLocationPage from "./pages/SelectedBunLocationPage.tsx";
+import {fetchAllTheBuns} from "./api/Buns.ts";
+import Header from "./components/Header.tsx";
 
 const BunLocator = () => {
+    const [buns, setBuns] = useState<HouseWithBunsId[]>([])
+    const [filteredBuns, setFilteredBuns] = useState<HouseWithBuns[]>([])
+    const [bunFilter, setBunFilter] = useState<BunFilter>('newest')
+    const [locationFilter, setLocationFilter] = useState<LocationFilter>('all')
     const [locationMarker, setLocationMarker] = useState<LatitudeLongitude>({latitude: 0, longitude: 0})
+    const {isSuccess, error, isLoading} = useQuery({
+        queryKey: ['allBuns'],
+        queryFn: () => fetchAllTheBuns(),
+        onSuccess: buns => setBuns(buns)
+    })
+    useEffect(() => {
+        setFilteredBuns(buns)
+    }, [buns]);
     useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -23,17 +37,21 @@ const BunLocator = () => {
             )
         }
     }, []);
-    return (
-        <CurrentBunLoverContext.Provider value={{locationMarker, setLocationMarker}}>
-            <QueryClientProvider client={queryClient}>
-                <BrowserRouter basename='/'>
-                    <Routes>
-                        <Route path='/' element={<TheBuns/>}/>
-                    </Routes>
-                </BrowserRouter>
-            </QueryClientProvider>
-        </CurrentBunLoverContext.Provider>
-    );
+    return isSuccess ? (
+            <CurrentBunLoverContext.Provider value={{locationMarker, setLocationMarker}}>
+                <BunsContext.Provider value={{buns, setBuns, filteredBuns, setFilteredBuns, bunFilter, setBunFilter, locationFilter, setLocationFilter}}>
+                    <BrowserRouter basename='/'>
+                        <Header/>
+                        <Routes>
+                            <Route path='/' element={<TheBunsPage/>}/>
+                            <Route path='/b/:locationWithBuns' element={<SelectedBunLocationPage/>}/>
+                            <Route path='/bidra' element={<ContributePage/>}/>
+                        </Routes>
+                    </BrowserRouter>
+                </BunsContext.Provider>
+            </CurrentBunLoverContext.Provider>
+        )
+        : <>Jeha..</>;
 };
 
 export default BunLocator

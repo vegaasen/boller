@@ -1,10 +1,10 @@
-import {HouseWithBuns, LatitudeLongitude} from "../types/Buns.ts";
+import {HouseWithBunsId, LatitudeLongitude} from "../types/Buns.ts";
 
-type BunLocationByDistance = { distance: number; bunLocation: HouseWithBuns }
+export type BunLocationByDistance = { distance: number; bunLocation: HouseWithBunsId }
 
 const asRoundedFixedNumber = (num: number) => +(Math.round(num * 100) / 100).toFixed(2)
 
-const distanceToBunLocation = (bunLoverLocation: LatitudeLongitude, bunLocation: HouseWithBuns) => {
+const distanceToBunLocation = (bunLoverLocation: LatitudeLongitude, bunLocation: HouseWithBunsId) => {
     const {latitude: lat1, longitude: lon1} = bunLoverLocation
     const {marker: {latitude: lat2, longitude: lon2}} = bunLocation
     const radlat1 = Math.PI * lat1 / 180;
@@ -24,7 +24,7 @@ const distanceToBunLocation = (bunLoverLocation: LatitudeLongitude, bunLocation:
 
 export const bunLocationsDistance = (
     bunLoverLocation: LatitudeLongitude,
-    bunLocations: HouseWithBuns[]
+    bunLocations: HouseWithBunsId[]
 ): BunLocationByDistance[] =>
     bunLocations
         .map(bunLocation =>
@@ -32,4 +32,3 @@ export const bunLocationsDistance = (
                 bunLocation,
                 distance: asRoundedFixedNumber(distanceToBunLocation(bunLoverLocation, bunLocation))
             }))
-        .sort((first, second) => first.distance > second.distance ? 1 : first.distance < second.distance ? -1 : 0)
